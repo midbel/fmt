@@ -1,10 +1,13 @@
 #include <iostream>
 
-using namespace std;
-
 namespace fmt
 {
-  string sprintf(string format);
-  void printf(string format);
-  void fprintf(ostream os, string format);
+  template<typename... Args>
+  std::string sprintf(const std::string& format, Args... args);
+
+  template<typename... Args>
+  void printf(const std::string& format, Args... args);
+
+  template<typename... Args>
+  void fprintf(std::ostream& os, const std::string& format, Args...args);
 }
