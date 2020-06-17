@@ -1,10 +1,7 @@
-#include <any>
-#include <vector>
-
+#include <sstream>
 #include "fmt.hpp"
 
-namespace fmt
-{
+namespace fmt {
 
   const char percent = '%';
   const char lsquare = '[';
@@ -18,43 +15,24 @@ namespace fmt
   const char zero = '0';
 
   template<typename... Args>
-  void format_string(ostream& os, const std::string& format, Args... args);
+  void format_string(std::ostream& os, const std::string& format, Args... args) {
+    os << format;
+  }
 
   template<typename... Args>
-  std::string sprintf(const std::string& format, Args... args)
-  {
-    ostringstream os;
-    format_string(os, format, args...);
+  std::string sprintf(const std::string& format, Args... args) {
+    std::ostringstream os;
+    fprintf(os, format, args...);
     return os.str();
   }
 
   template<typename... Args>
-  void printf(const std::string& format, Args... args)
-  {
-    fprintf(cout, format, args...)
+  void printf(const std::string& format, Args... args) {
+    fprintf(std::cout, format, args...);
   }
 
   template<typename... Args>
-  void fprintf(ostream& os, const std::string& format, Args... args)
-  {
+  void fprintf(std::ostream& os, const std::string& format, Args... args) {
     format_string(os, format, args...);
-  }
-
-  template<typename... Args>
-  void format_string(ostream& os, const std::string& format, Args... args)
-  {
-    if (!format.size()) {
-      return ;
-    }
-    vector<any> values = {args...};
-    int arg = 0;
-
-    auto it = format.begin();
-    auto end = format.end();
-    auto prev = it;
-    while (it < end)
-    {
-
-    }
   }
 }
