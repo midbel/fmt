@@ -9,6 +9,13 @@ namespace fmt
   const char percent = '%';
   const char lsquare = '[';
   const char rsquare = ']';
+  const char dot = '.';
+  const char pound = '#';
+  const char space = ' ';
+  const char star = '*';
+  const char plus = '+';
+  const char minus = '-';
+  const char zero = '0';
 
   template<typename... Args>
   void format_string(ostream& os, const std::string& format, Args... args);
@@ -42,9 +49,10 @@ namespace fmt
     vector<any> values = {args...};
     int arg = 0;
 
-    auto it = format.cbegin();
+    auto it = format.begin();
+    auto end = format.end();
     auto prev = it;
-    while (it < format.cend())
+    while (it < end)
     {
 
     }
