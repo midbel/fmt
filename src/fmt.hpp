@@ -20,6 +20,8 @@
 #define BOOL "bool"
 #define CHAR "char"
 
+#define PREC 6
+
 namespace fmt {
 
   class fmt_error: public std::exception {
@@ -130,12 +132,14 @@ namespace fmt {
         argnum++;
         it = next(it);
       }
+      os << std::resetiosflags(std::ios_base::basefield);
+      os << std::flush;
     }
 
     void reset() {
       arg = 0;
       wid = 0;
-      prec = 0;
+      prec = PREC;
 
       sign = false;
       space = false;
@@ -160,6 +164,10 @@ namespace fmt {
         throw bad_argument();
       }
       int i = std::any_cast<int>(val);
+      if (sign && i > 0) {
+        os << fmt::plus;
+      }
+      os << (sharp ? std::showbase : std::noshowbase);
       switch (base) {
         case BIN:
         os << std::bitset<32>(i).to_string();
@@ -204,22 +212,26 @@ namespace fmt {
       } else {
         throw bad_argument();
       }
+      if (sign && i > 0) {
+        os << fmt::plus;
+      }
       if (exponent) {
-        os << std::scientific << i;
+        os << std::scientific << std::setprecision(prec) << i;
         return ;
       }
       if (percent) {
-        os << i*100 << "%";
+        os << std::setprecision(prec) << i*100 << "%";
         return ;
       }
-      os << i;
+      os << std::setprecision(prec) << i;
     }
 
     void format_bool(std::ostream& os, std::any val) {
       if (val.type() != typeid(bool)) {
         throw bad_argument();
       }
-      os << std::boolalpha << std::any_cast<bool>(val);
+      os << (sharp ? std::noboolalpha : std::boolalpha);
+      os << std::any_cast<bool>(val);
     }
 
     void format_char(std::ostream& os, std::any val) {
@@ -368,11 +380,15 @@ namespace fmt {
       if (*it != dot) {
         return;
       }
+      it = next(it);
       auto start = it;
       while (is_number(*it)) {
         it = std::next(it);
       }
       prec = std::stoi(std::string(start, it));
+      if (prec == 0) {
+        prec = PREC;
+      }
     }
 
     bool is_number(char c) {
