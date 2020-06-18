@@ -221,6 +221,8 @@ namespace fmt {
       std::string str;
       if (val.type() == typeid(std::string)) {
         str = std::any_cast<std::string>(val);
+      } else if (val.type() == typeid(const char*)) {
+        str = std::string(std::any_cast<const char*>(val));
       } else if (val.type() == typeid(char*)) {
         str = std::string(std::any_cast<char*>(val));
       } else {

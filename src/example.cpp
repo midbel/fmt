@@ -5,9 +5,9 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   try {
-    fmt::format("format namespace: %s", "fmt");
-    fmt::format("version: %d.%d.%d", 0, 0, 1);
-    fmt::format("repository: %s", "https://github.com/midbel/fmt");
+    fmt::format("format namespace: %s\n", "fmt");
+    fmt::format("version: %d.%d.%d\n", 0, 0, 1);
+    fmt::format("repository: %s\n", "https://github.com/midbel/fmt");
   } catch(fmt::fmt_error &e) {
     std::cerr << "misc: " << e.what() << std::endl;
     return 1;
