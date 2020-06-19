@@ -19,6 +19,7 @@
 #define DOUBLE "double"
 #define BOOL "bool"
 #define CHAR "char"
+#define UNKNOWN "unknown"
 
 #define PREC 6
 
@@ -62,8 +63,8 @@ namespace fmt {
   const char minus = '-';
   const char zero = '0';
 
-  // syntax: %[[index]][#][-][ |0][width.prec][+][verb]
-  class state {
+  // syntax: %[[index]][#][-][ |0][width][.prec][+][verb]
+  class formatter {
   public:
     template<typename... Args>
     void format(std::ostream& os, std::string format, Args&... args) {
@@ -80,7 +81,10 @@ namespace fmt {
         reset();
 
         it = std::next(it);
-        parse_specifier(argnum, it, format.end());
+        parse_specifier(argnum, it, end);
+        if (it >= end) {
+          throw fmt_error("invalid specifier");
+        }
         if (arg < 0 || arg >= values.size()) {
           throw bad_index();
         }
@@ -141,6 +145,8 @@ namespace fmt {
       wid = 0;
       prec = PREC;
 
+      verb = 0;
+
       sign = false;
       space = false;
       zeros = false;
@@ -153,6 +159,8 @@ namespace fmt {
     int wid;
     int prec;
 
+    char verb;
+
     bool sign;
     bool space;
     bool zeros;
@@ -160,10 +168,16 @@ namespace fmt {
     bool sharp;
 
     void format_int(std::ostream& os, std::any val, int base = DEC) {
-      if (val.type() != typeid(int))   {
+      int i;
+      if (val.type() == typeid(int)) {
+        i = std::any_cast<int>(val);
+      } else if (val.type() == typeid(double)) {
+        i = std::any_cast<double>(val);
+      } else if (val.type() == typeid(bool)) {
+        i = std::any_cast<bool>(val) ? 1 : 0;
+      } else {
         throw bad_argument();
       }
-      int i = std::any_cast<int>(val);
       if (sign && i > 0) {
         os << fmt::plus;
       }
@@ -271,7 +285,8 @@ namespace fmt {
       } else if (val.type() == typeid(char)) {
         type = CHAR;
       } else {
-        throw bad_argument();
+        type = UNKNOWN;
+        // throw bad_argument();
       }
       os << type;
     }
@@ -310,7 +325,7 @@ namespace fmt {
       os << std::string(prev, it);
     }
 
-    char parse_specifier(int ix, std::string::iterator& it, const std::string::iterator& end) {
+    void parse_specifier(int ix, std::string::iterator& it, const std::string::iterator& end) {
       parse_index(ix, it, end);
 
       if (*it == fmt::pound) {
@@ -344,7 +359,7 @@ namespace fmt {
         sign = true;
         it = std::next(it);
       }
-      return *it;
+      verb = *it;
     }
 
     void parse_index(int ix, std::string::iterator& start, const std::string::iterator& end) {
@@ -400,14 +415,14 @@ namespace fmt {
         start = std::next(start);
       }
     }
-  } sx;
+  } ft;
 
   template<typename... Args>
   void formatf(std::ostream& os, const std::string& format, const Args&... args) {
     if (!format.size()) {
       return ;
     }
-    sx.format(os, format, args...);
+    ft.format(os, format, args...);
   }
 
   template<typename... Args>
